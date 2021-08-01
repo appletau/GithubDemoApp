@@ -14,6 +14,7 @@ protocol GithubUserViewModelLogic: AnyObject {
   func loadNextPageData()
   var dataSource: [PaginationControllerItem] { get }
   var listChangeEventSignal: Signal<DataListChangEvent> { get }
+  var showLoadingIndicatorDriver: Driver<Bool> { get }
 }
 
 final class GithubUserViewModel: GithubUserViewModelLogic {
@@ -21,7 +22,13 @@ final class GithubUserViewModel: GithubUserViewModelLogic {
     return paginationController.dataList
   }
   
-  lazy var listChangeEventSignal: Signal<DataListChangEvent> = paginationController.dataListUpdateSignal.asSignal()
+  var listChangeEventSignal: Signal<DataListChangEvent> {
+    return paginationController.dataListUpdateSignal.asSignal()
+  }
+  
+  var showLoadingIndicatorDriver: Driver<Bool> {
+    return paginationController.currentState.asDriver().map { $0 is ReloadDataState }
+  }
 
   private var queryString: String = ""
   private let paginationController: PaginationControllerLogic

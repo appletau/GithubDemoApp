@@ -44,6 +44,7 @@ final class GithubUserCollectionCell: UICollectionViewCell {
   }
   
   private func setupUI() {
+    isUserInteractionEnabled = false
     contentView.addSubview(avatarImageView)
     avatarImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10).isActive = true
     avatarImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10).isActive = true

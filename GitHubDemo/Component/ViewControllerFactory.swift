@@ -13,7 +13,7 @@ protocol ViewControllerFactoryLogic {
 
 struct ViewControllerFactory: ViewControllerFactoryLogic {
   func createGithubUserViewController() -> UIViewController {
-    let paginationController: PaginationController = .init()
+    let paginationController: PaginationController = .init(loadMoreCellIdentifier: CollectionLoadMoreCell.describing)
     let viewModel: GithubUserViewModel = .init(repository: GithubSearchRepository(),
                                                paginationController: paginationController)
     paginationController.delegate = viewModel

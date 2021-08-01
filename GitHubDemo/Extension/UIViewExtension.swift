@@ -8,5 +8,5 @@
 import UIKit
 
 extension UIView {
-  static let describing: String = .init(describing: self)
+  static var describing: String { return String(describing: self) }
 }

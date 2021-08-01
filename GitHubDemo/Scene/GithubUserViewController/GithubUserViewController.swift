@@ -26,7 +26,16 @@ final class GithubUserViewController: UIViewController {
     collectionView.backgroundColor = .white
     collectionView.translatesAutoresizingMaskIntoConstraints = false
     collectionView.register(GithubUserCollectionCell.self, forCellWithReuseIdentifier: GithubUserCollectionCell.describing)
+    collectionView.register(CollectionLoadMoreCell.self, forCellWithReuseIdentifier: CollectionLoadMoreCell.describing)
     return collectionView
+  }()
+  
+  private lazy var loadingIndicator: UIActivityIndicatorView = {
+    let indicator = UIActivityIndicatorView()
+    indicator.style = .whiteLarge
+    indicator.color = .init(white: 74/255, alpha: 1)
+    indicator.translatesAutoresizingMaskIntoConstraints = false
+    return indicator
   }()
   
   private let viewModel: GithubUserViewModelLogic
@@ -56,6 +65,10 @@ final class GithubUserViewController: UIViewController {
     collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
     collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+    
+    view.addSubview(loadingIndicator)
+    loadingIndicator.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor).isActive = true
+    loadingIndicator.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor).isActive = true
   }
   
   private func setupBinding() {
@@ -76,6 +89,13 @@ final class GithubUserViewController: UIViewController {
       .subscribe(onNext: { [weak self] _ in
         guard let self = self else { return }
         self.viewModel.loadNextPageData()
+      })
+      .disposed(by: disposeBag)
+    
+    viewModel.showLoadingIndicatorDriver
+      .drive(onNext: { [weak self] isShow in
+        guard let self = self else { return }
+        isShow ? self.loadingIndicator.startAnimating() : self.loadingIndicator.stopAnimating()
       })
       .disposed(by: disposeBag)
     
@@ -100,6 +120,18 @@ extension GithubUserViewController: UICollectionViewDataSource {
     return viewModel.dataSource.count
   }
   
+  func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    if let cell = cell as? CollectionLoadMoreCell {
+      cell.startAnimating()
+    }
+  }
+  
+  func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    if let cell = cell as? CollectionLoadMoreCell {
+      cell.stopAnimating()
+    }
+  }
+  
   func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let cellDataModel = viewModel.dataSource[indexPath.row]
     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellDataModel.cellIdentifier, for: indexPath)
@@ -113,6 +145,8 @@ extension GithubUserViewController: UICollectionViewDataSource {
 
 extension GithubUserViewController: UICollectionViewDelegateFlowLayout {
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    return .init(width: collectionView.bounds.width, height: collectionView.bounds.height/6)
+    let cellDataModel = viewModel.dataSource[indexPath.item]
+    let height: CGFloat = cellDataModel.cellIdentifier == CollectionLoadMoreCell.describing ? 50 : collectionView.bounds.height/6
+    return .init(width: collectionView.bounds.width, height: height)
   }
 }
