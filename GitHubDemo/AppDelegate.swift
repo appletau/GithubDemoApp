@@ -16,8 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIWindowSceneDelegate {
     if #available(iOS 13.0, *) {
     } else {
       window = UIWindow(frame: UIScreen.main.bounds)
-      let vc = ViewController()
-      window?.rootViewController = vc
+      let vcFactory = ViewControllerFactory()
+      let navigationController = UINavigationController(rootViewController: vcFactory.createGithubUserViewController())
+      window?.rootViewController = navigationController
       window?.makeKeyAndVisible()
     }
     return true
@@ -27,8 +28,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIWindowSceneDelegate {
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     guard let windowScene = (scene as? UIWindowScene) else { return }
     window = UIWindow(frame: UIScreen.main.bounds)
-    let vc = ViewController()
-    window?.rootViewController = vc
+    let vcFactory = ViewControllerFactory()
+    let navigationController = UINavigationController(rootViewController: vcFactory.createGithubUserViewController())
+    window?.rootViewController = navigationController
     window?.makeKeyAndVisible()
     window?.windowScene = windowScene
   }
